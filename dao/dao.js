@@ -1,8 +1,16 @@
-
 const express=require('express');
 var util = require('util');
+const rateLimit = require('express-rate-limit');
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100 // limit each IP to 100 requests per windowMs
+});
+
 module.exports=function (){
     var router=express.Router();
+    router.use(limiter); // Apply rate limiter to all routes
+
     router.get('/lod', (req, res)=>{
         var id = req.session.id;
 
