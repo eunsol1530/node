@@ -25,7 +25,16 @@ var arr=[];
 for(var i=0;i<100000;i++){
     arr.push('keys_'+Math.random());
 }
-server.use(cookieSession({name: 'zns_sess_id', keys: arr, maxAge: 20*3600*1000}));
+server.use(cookieSession({
+    name: 'zns_sess_id',
+    keys: arr,
+    maxAge: 20*3600*1000,
+    domain: 'example.com', // Set to your domain
+    path: '/',
+    httpOnly: true,
+    secure: true, // Ensure this is set to true in production
+    expires: new Date(Date.now() + 20*3600*1000)
+}));
 
 //3.post数据
 server.use(bodyParser.urlencoded({extended: false}));
@@ -50,4 +59,3 @@ server.use(express.static(path.join(__dirname,'/src/views')));  // 配置静态�
 server.use('*',function (req,res) {
     res.send('没找到');
 });
-
