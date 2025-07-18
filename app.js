@@ -10,7 +10,14 @@ const cookieParser=require('cookie-parser');
 const cookieSession=require('cookie-session');
 const expressRoute=require('express-route');
 const consolidate = require('consolidate');
+const helmet = require('helmet');
+const csrf = require('csurf');
 
+// Use helmet to secure Express apps by setting various HTTP headers
+server.use(helmet());
+
+// CSRF protection middleware
+const csrfProtection = csrf({ cookie: true });
 
 // 监听端口
 server.listen(80,function () {
@@ -18,7 +25,7 @@ server.listen(80,function () {
 });  // 监听端口号
 
 //1.解析cookie
-server.use(cookieParser('sdfasl43kjoifguokn4lkhoifo4k3'));
+server.use(cookieParser(process.env.COOKIE_SECRET || 'default_secret'));
 
 //2.使用session
 var arr=[];
@@ -31,12 +38,13 @@ server.use(cookieSession({name: 'zns_sess_id', keys: arr, maxAge: 20*3600*1000})
 server.use(bodyParser.urlencoded({extended: false}));
 server.use(multer({dest: './static/upload'}).any());
 
+// Apply CSRF protection to all routes
+server.use(csrfProtection);
 
 // 配置视图
 server.set('view engine','html');
 server.set('views','./src/views');
 server.engine('html',consolidate.ejs);
-
 
 // 配置路由
 server.use('/',require('./dao/admin')());
@@ -50,4 +58,3 @@ server.use(express.static(path.join(__dirname,'/src/views')));  // 配置静态�
 server.use('*',function (req,res) {
     res.send('没找到');
 });
-
