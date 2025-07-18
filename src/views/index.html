@@ -45,7 +45,9 @@
             success:function (data) {
                 var node = '',time = 0;
                 data.forEach(function (val) {
-                    node +="<tr><td>"+val.data+"</td><td>"+val.length+"</td></tr>";
+                    var safeData = $('<div>').text(val.data).html();
+                    var safeLength = $('<div>').text(val.length).html();
+                    node +="<tr><td>"+safeData+"</td><td>"+safeLength+"</td></tr>";
                     time += val.length;
                 });
                 $('#node').html(node);

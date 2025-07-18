@@ -1,4 +1,3 @@
-
 const express=require('express');
 var util = require('util');
 module.exports=function (){
@@ -8,18 +7,22 @@ module.exports=function (){
 
         var mysql = require('mysql') ;
         var connection = mysql.createConnection({
-            host : 'localhost' ,
-            user : 'root' ,
-            password : 'root' ,
-            database : 'daka'
+            host : process.env.DB_HOST || 'localhost' ,
+            user : process.env.DB_USER || 'root' ,
+            password : process.env.DB_PASSWORD || 'root' ,
+            database : process.env.DB_NAME || 'daka'
         });
 
         var selectSql = 'select * from time where id = ?' ;
         connection.query(selectSql,[id],function(err,cb){
-            var data = JSON.parse(util.format('%j',cb[0]));
-            console.log(data)
+            if (err) {
+                res.status(500).send('Database query error').end();
+                return;
+            }
             if(cb.length > 0){
-                res.send(cb).end();
+                res.json(cb).end();
+            } else {
+                res.status(404).send('No data found').end();
             }
         })
         connection.end();
@@ -31,10 +34,10 @@ module.exports=function (){
         var time = req.param('time');
         var mysql = require('mysql') ;
         var connection = mysql.createConnection({
-            host : 'localhost' ,
-            user : 'root' ,
-            password : 'root' ,
-            database : 'daka'
+            host : process.env.DB_HOST || 'localhost' ,
+            user : process.env.DB_USER || 'root' ,
+            password : process.env.DB_PASSWORD || 'root' ,
+            database : process.env.DB_NAME || 'daka'
         });
 
         var selectSql = 'insert into time values(?,?,?)' ;
@@ -42,7 +45,9 @@ module.exports=function (){
             if(!err){
                 console.log('ssssssssss');
                 var na = {type:true};
-                res.send(na).end();
+                res.json(na).end();
+            } else {
+                res.status(500).send('Database insertion error').end();
             }
         })
         connection.end();
@@ -55,18 +60,24 @@ module.exports=function (){
 
         var mysql = require('mysql') ;
         var connection = mysql.createConnection({
-            host : 'localhost' ,
-            user : 'root' ,
-            password : 'root' ,
-            database : 'daka'
+            host : process.env.DB_HOST || 'localhost' ,
+            user : process.env.DB_USER || 'root' ,
+            password : process.env.DB_PASSWORD || 'root' ,
+            database : process.env.DB_NAME || 'daka'
         });
 
         var selectSql = 'select * from user where user = ? and pwd = ?' ;
         connection.query(selectSql,[user,pwd],function(err,cb){
-            var data = JSON.parse(util.format('%j',cb[0]));
+            if (err) {
+                res.status(500).send('Database query error').end();
+                return;
+            }
             if(cb.length > 0){
+                var data = JSON.parse(util.format('%j',cb[0]));
                 req.session.id = data.id;
                 res.render('index.html');
+            } else {
+                res.status(401).send('Unauthorized').end();
             }
         })
         connection.end();
